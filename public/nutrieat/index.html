@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriEat — Navigable Prototype</title>
+<style>
+  :root{
+    --green:#40DF94; --green-strong:#00BE62; --green-deep:#0B8A4B;
+    --green-100:#E4F9EE; --green-200:#BDEED6; --green-card:#A1DDA6;
+    --ink:#132A20; --ink-2:#5A6B62; --bg-app:#F6F7F6; --line:#E4E9E5;
+    --danger:#E5484D; --coin:#F79D18;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  body{background:#17211C;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#EDEDED;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 16px 48px}
+  header.top{width:100%;max-width:860px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:22px}
+  header.top .t{font-weight:800;font-size:17px}
+  header.top .s{font-size:12px;color:#9DB5A8}
+  header.top a{color:var(--green);font-size:12px;font-weight:700;text-decoration:none;border:1px solid #2E4437;border-radius:999px;padding:7px 12px}
+  header.top a:hover{background:#203028}
+  .stage{display:flex;gap:28px;align-items:flex-start}
+  .side{width:230px;font-size:12px;color:#9DB5A8;line-height:1.7}
+  .side b{color:#DFF5E9}
+  .side .lg{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--green)}
+
+  .phone{width:390px;height:844px;border-radius:44px;background:#0B0D0C;padding:10px;box-shadow:0 30px 80px rgba(0,0,0,.55);flex:none}
+  .screenbox{position:relative;width:100%;height:100%;border-radius:34px;background:var(--bg-app);overflow:hidden;color:var(--ink)}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#0B0D0C;border-radius:16px;z-index:40}
+  .slogo{width:26px;height:26px;color:var(--green-strong);flex:none;margin-bottom:2px}
+  .scr{position:absolute;inset:0;display:none;flex-direction:column}
+  .scr.on{display:flex}
+  .statusbar{height:52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-size:13px;font-weight:600}
+  .content{flex:1;overflow-y:auto;padding:4px 16px 10px;scrollbar-width:none}
+  .content::-webkit-scrollbar{display:none}
+
+  .navbar{height:72px;background:var(--green);display:flex;align-items:center;justify-content:space-around;border-radius:22px 22px 0 0;flex:none}
+  .navbar svg{width:26px;height:26px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;cursor:pointer}
+  .navbtn{width:52px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:22px}
+  .navbtn.active{background:rgba(255,255,255,.35)}
+
+  .back{width:36px;height:36px;border-radius:12px;background:#E8EBE9;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none}
+  .h-title{font-size:17px;font-weight:700;color:var(--green-strong)}
+  .h-sub{font-size:13px;color:var(--ink-2)}
+  .headrow{display:flex;align-items:center;gap:10px;margin:2px 0 10px}
+  .toggles{margin-left:auto;display:flex;gap:6px}
+  .ok{width:24px;height:24px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;border:none;cursor:pointer}
+  .ok svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .no{width:24px;height:24px;border-radius:50%;border:2.5px solid var(--danger);display:flex;align-items:center;justify-content:center;background:#fff;border:none;cursor:pointer}
+  .no svg{width:11px;height:11px;stroke:var(--danger);stroke-width:3;fill:none;stroke-linecap:round}
+
+  .mealcard{background:#fff;border-radius:18px;padding:12px 12px 8px;margin-bottom:12px}
+  .foods{display:flex;gap:10px}
+  .food{flex:1;text-align:center}
+  .food .tile{height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;background:var(--green-100)}
+  .food .fl{font-size:10.5px;font-weight:600;margin-top:5px;line-height:1.25}
+  .cardtop{display:flex;justify-content:flex-end;gap:6px;margin-bottom:8px}
+  .inforow{margin-top:8px}
+  .infoic{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-style:italic;font-family:Georgia,serif;background:none;cursor:pointer}
+
+  .btn{display:flex;align-items:center;justify-content:center;background:var(--green);color:#083B24;font-weight:700;font-size:14px;border-radius:12px;height:44px;border:none;cursor:pointer;width:100%}
+  .btn.ghost{background:var(--green-100);color:var(--green-deep)}
+  .btn.small{width:auto;padding:0 18px;height:38px}
+  .input{height:46px;border-radius:12px;background:#ECEEEC;border:1px solid var(--line);display:flex;align-items:center;padding:0 14px;font-size:13px;color:var(--ink-2);margin-bottom:12px}
+  .chip{background:#E8EBE9;border-radius:10px;height:42px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.04em;margin-bottom:14px;cursor:pointer;border:none;width:100%}
+  .chip:hover{background:var(--green-200)}
+
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;text-align:center;font-size:11.5px;font-weight:700;padding:8px 0;border-radius:10px;background:#E8EBE9;cursor:pointer;border:none}
+  .tab.on{background:var(--green);color:#083B24}
+
+  .recipecard{margin-bottom:14px;cursor:pointer}
+  .recipecard .tile{height:110px;border-radius:16px;background:var(--green-100);display:flex;align-items:center;justify-content:center;font-size:52px}
+  .stars{color:var(--coin);font-size:12px;letter-spacing:2px}
+  .rname{font-size:13px;font-weight:600}
+  .rate{float:right;font-size:12px;font-weight:700;color:var(--ink-2)}
+  .search{height:40px;border-radius:20px;background:#E8EBE9;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:13px;color:var(--ink-2);margin-bottom:14px}
+
+  .coupon{background:var(--green-card);border-radius:16px;padding:12px;margin-bottom:14px;cursor:pointer}
+  .coupon .ct{font-size:13px;font-weight:700;margin-bottom:8px}
+  .coupon .img{height:88px;border-radius:12px;background:var(--green-200);display:flex;align-items:center;justify-content:center;font-size:42px}
+  .coupon .cost{display:flex;justify-content:flex-end;align-items:center;gap:6px;font-weight:800;margin-top:8px}
+  .coin{width:22px;height:22px;border-radius:50%;background:var(--coin);color:#7A4A00;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+
+  .codecard{background:#fff;border:3px solid var(--green);border-radius:4px;padding:16px;margin-bottom:16px}
+  .codecard .t{font-size:15px;font-weight:800}
+  .codecard .s{font-size:12.5px;font-weight:600;margin-top:10px}
+
+  .listrow{background:#fff;border-bottom:1px solid var(--line);padding:14px 4px;font-size:13.5px;font-weight:700;cursor:pointer;text-align:left;width:100%;border-left:none;border-right:none;border-top:none;font-family:inherit}
+  .pagetitle{background:#fff;text-align:center;font-weight:800;font-size:15px;padding:12px 0;border-bottom:1px solid var(--line);margin:0 -16px 14px}
+
+  .colorrow{display:flex;gap:10px;border-radius:14px;padding:10px;margin-bottom:10px;align-items:center}
+  .colorrow .bubbles{display:flex;gap:6px;flex:none}
+  .colorrow .bb{width:30px;height:30px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+  .colorrow .txt b{display:block;font-size:11px}
+  .colorrow .txt span{font-size:9.5px;line-height:1.3;display:block}
+
+  .splash{background:var(--green);align-items:center;justify-content:center;cursor:pointer;color:#fff}
+  .capa{background:var(--green);align-items:center;justify-content:center;text-align:center;padding:28px;color:#fff}
+  .exgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+  .ex{position:relative;text-align:center;cursor:pointer}
+  .ex .tile{height:62px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .ex .fl{font-size:9.5px;font-weight:600;margin-top:4px}
+  .ex .no{position:absolute;top:-4px;right:6px;width:20px;height:20px}
+  .ex .no.off{visibility:hidden}
+
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:22px 20px 26px;box-shadow:0 -12px 40px rgba(0,0,0,.25);z-index:50;display:none}
+  .sheet.on{display:block}
+  .sheet h4{font-size:14px;margin-bottom:14px}
+  .toast{position:absolute;left:50%;transform:translateX(-50%);bottom:88px;background:var(--ink);color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:9px 16px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="logo" viewBox="0 0 220 220">
+    <path id="arcTop" d="M 40 128 A 78 78 0 0 1 180 128" fill="none"/>
+    <text fill="currentColor" font-family="system-ui, sans-serif" font-size="24" font-weight="800" letter-spacing="3">
+      <textPath href="#arcTop" startOffset="50%" text-anchor="middle">NUTRI EAT</textPath>
+    </text>
+    <circle cx="110" cy="140" r="46" fill="none" stroke="currentColor" stroke-width="5"/>
+    <path d="M 78 172 L 62 196 L 96 182" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/>
+    <g stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none">
+      <path d="M 98 162 V 128"/><path d="M 90 118 v 12"/><path d="M 98 118 v 12"/><path d="M 106 118 v 12"/>
+      <path d="M 90 130 q 8 8 16 0"/>
+    </g>
+    <path d="M 116 138 q 16 -18 30 -4 q -12 16 -30 4 z" fill="currentColor"/>
+    <path d="M 112 146 L 128 132" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="mark" viewBox="60 90 120 110">
+    <circle cx="110" cy="140" r="46" fill="none" stroke="currentColor" stroke-width="7"/>
+    <path d="M 78 172 L 62 196 L 96 182" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/>
+    <g stroke="currentColor" stroke-width="7" stroke-linecap="round" fill="none">
+      <path d="M 98 162 V 128"/><path d="M 90 118 v 12"/><path d="M 98 118 v 12"/><path d="M 106 118 v 12"/>
+      <path d="M 90 130 q 8 8 16 0"/>
+    </g>
+    <path d="M 116 138 q 16 -18 30 -4 q -12 16 -30 4 z" fill="currentColor"/>
+    <path d="M 112 146 L 128 132" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 3H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 5-5 8-5s6.5 1 8 5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</svg>
+
+<header class="top">
+  <div>
+    <div class="t">🥗 NutriEat — Navigable Prototype</div>
+    <div class="s">Overall semifinalist among all Senac campuses · Senac São Paulo · IT technical program</div>
+  </div>
+  <a href="https://www.figma.com/proto/2EeHaUnIb6XxF3dvjsjD8F/NutriEat-Prototype?node-id=0-1&t=5Q4Jr2fC64YOJ64O-1" target="_blank">Figma prototype</a>
+  <a href="business-plan.pdf" target="_blank">Business plan (PDF)</a>
+</header>
+
+<div class="stage">
+  <div class="side">
+    <div class="lg"><svg width="44" height="44" viewBox="0 0 220 220"><use href="#logo"/></svg></div>
+    <b>How to navigate</b><br>
+    The flow follows the business-plan flowchart: open app → have an account? → signup → food style → food selection → home → food guide/region → meal → recipe → feedback → my coupons → exit app.<br><br>
+    <b>Tip:</b> in Figma, replicate these same connections in Prototype mode (table in <i>figma-import-guide.md</i>).
+  </div>
+
+  <div class="phone"><div class="screenbox">
+    <div class="notch"></div>
+    <div class="toast" id="toast"></div>
+
+    <!-- COVER -->
+    <section class="scr on capa" id="s-capa">
+      <svg width="150" height="150"><use href="#logo"/></svg>
+      <div style="color:#fff;font-size:22px;font-weight:800;margin-top:14px">NutriEat</div>
+      <div style="color:#EFFFF6;font-size:12.5px;font-weight:600;margin-top:8px;line-height:1.6">
+        Presentation prototype<br>
+        Role: Analyst / Project Manager<br>
+        🏆 Overall semifinalist — all Senac campuses
+      </div>
+      <div style="color:#EFFFF6;font-size:11px;margin-top:10px;opacity:.85">Full business plan in the link above ↑</div>
+      <button class="btn" style="margin-top:26px;background:#fff;color:var(--green-deep)" onclick="go('s-splash')">Start prototype</button>
+    </section>
+
+    <!-- SPLASH -->
+    <section class="scr splash" id="s-splash" onclick="go('s-conta')">
+      <svg width="210" height="210"><use href="#logo"/></svg>
+      <div style="margin-top:26px;color:#fff;font-weight:700;font-size:15px">Healthy eating that fits your pocket!</div>
+      <div style="margin-top:30px;color:#EFFFF6;font-size:11px;opacity:.8">tap to continue</div>
+    </section>
+
+    <!-- HAVE AN ACCOUNT? -->
+    <section class="scr" id="s-conta">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content" style="display:flex;flex-direction:column;justify-content:center;padding-top:60px">
+        <div style="text-align:center;color:var(--green-strong);font-weight:800;font-size:18px;margin-bottom:34px">Have an account?</div>
+        <button class="btn" style="margin-bottom:14px" onclick="go('s-cadastro')">No — Create account</button>
+        <button class="btn ghost" onclick="go('s-home')">Yes — Log in</button>
+      </div>
+    </section>
+
+    <!-- SIGNUP -->
+    <section class="scr" id="s-cadastro">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content" style="display:flex;flex-direction:column;align-items:center;padding-top:44px">
+        <div style="background:var(--green);border-radius:8px;width:120px;height:120px;display:flex;align-items:center;justify-content:center;color:#fff"><svg width="105" height="105"><use href="#logo"/></svg></div>
+        <div style="color:var(--green-strong);font-weight:700;font-size:16px;margin:18px 0 24px">Sign up</div>
+        <div class="input" style="width:100%">Email</div>
+        <div class="input" style="width:100%">Password</div>
+        <button class="btn small" style="margin-left:auto" onclick="go('s-pref')">Next</button>
+      </div>
+    </section>
+
+    <!-- PREFERENCE -->
+    <section class="scr" id="s-pref">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content" style="padding-top:22px">
+        <button class="back" onclick="go('s-cadastro')">←</button>
+        <div style="text-align:center;color:var(--green-strong);font-weight:700;font-size:16px;margin:26px 0 30px">What is your<br>food preference?</div>
+        <button class="chip" onclick="go('s-excl')">VEGANISM</button>
+        <button class="chip" onclick="go('s-excl')">VEGETARIANISM</button>
+        <button class="chip" onclick="go('s-excl')">OVO-LACTO VEGETARIANISM</button>
+        <button class="btn ghost" onclick="go('s-excl')">None of the above</button>
+      </div>
+    </section>
+
+    <!-- EXCLUSION -->
+    <section class="scr" id="s-excl">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content" style="padding-top:22px">
+        <button class="back" onclick="go('s-pref')">←</button>
+        <div style="text-align:center;color:var(--green-strong);font-weight:700;font-size:15px;margin:18px 0 16px">Which foods do you<br>not want in your diet?</div>
+        <div class="exgrid">
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🥛</div><div class="fl">Dairy</div></div>
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🥚</div><div class="fl">Eggs</div></div>
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🥜</div><div class="fl">Peanuts</div></div>
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🦐</div><div class="fl">Seafood</div></div>
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🥩</div><div class="fl">Red meat</div></div>
+          <div class="ex" onclick="this.querySelector('.no').classList.toggle('off')"><span class="no"><svg><use href="#i-x"/></svg></span><div class="tile">🎃</div><div class="fl">Pumpkin</div></div>
+          <div class="ex"><div class="tile">🥦</div><div class="fl">Broccoli</div></div>
+          <div class="ex"><div class="tile">🫑</div><div class="fl">Peppers</div></div>
+          <div class="ex"><div class="tile">🍅</div><div class="fl">Tomato</div></div>
+        </div>
+        <button class="btn" style="margin-top:20px" onclick="go('s-home')">Next</button>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="scr" id="s-home">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div class="headrow">
+          <div><div class="h-title" id="mealTitle">Breakfast</div><div class="h-sub" id="regionLbl">São Paulo · current location</div></div>
+          <div class="toggles">
+            <button class="ok" title="Food Guide: yes — choose region" onclick="openSheet('sh-regiao')"><svg><use href="#i-check"/></svg></button>
+            <button class="no" title="Food Guide: no — see Information" onclick="go('s-info')"><svg><use href="#i-x"/></svg></button>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab on" onclick="setMeal(0,this)">Breakfast</button>
+          <button class="tab" onclick="setMeal(1,this)">Lunch</button>
+          <button class="tab" onclick="setMeal(2,this)">Dinner</button>
+        </div>
+        <div id="meals"></div>
+      </div>
+      <nav class="navbar" id="nav-home">
+        <span class="navbtn active"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn" onclick="go('s-receitas')"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn" onclick="go('s-notif')"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn" onclick="go('s-config')"><svg><use href="#i-user"/></svg></span>
+      </nav>
+      <div class="sheet" id="sh-regiao">
+        <h4>Choose a region (Food Guide)</h4>
+        <button class="chip" onclick="setRegion('São Paulo')">SÃO PAULO</button>
+        <button class="chip" onclick="setRegion('Recife')">RECIFE</button>
+        <button class="chip" onclick="setRegion('Porto Alegre')">PORTO ALEGRE</button>
+        <button class="btn ghost" onclick="closeSheets()">Current location</button>
+      </div>
+    </section>
+
+    <!-- RECIPES -->
+    <section class="scr" id="s-receitas">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div style="text-align:center;font-weight:800;color:var(--green-strong);font-size:16px;margin-bottom:12px">Recipes ⓘ</div>
+        <div class="search">🔍&nbsp; Search</div>
+        <div style="font-size:14px;font-weight:700;color:var(--ink-2);margin-bottom:12px">Suggestions</div>
+        <div class="recipecard" onclick="openRecipe('Chicken stroganoff')"><div class="tile">🍲</div>
+          <div style="margin-top:8px"><span class="stars">★★★★☆</span><span class="rate">4.0</span></div><div class="rname">Chicken stroganoff</div></div>
+        <div class="recipecard" onclick="openRecipe('Chicken lunch')"><div class="tile">🍗</div>
+          <div style="margin-top:8px"><span class="stars">★★★★★</span><span class="rate">4.5</span></div><div class="rname">Chicken lunch</div></div>
+        <div class="recipecard" onclick="openRecipe('Banana cake')"><div class="tile">🍰</div>
+          <div style="margin-top:8px"><span class="stars">★★★★★</span><span class="rate">5.0</span></div><div class="rname">Banana cake</div></div>
+        <div class="recipecard" onclick="openRecipe('Sweet potato chips')"><div class="tile">🍠</div>
+          <div style="margin-top:8px"><span class="stars">★★★★★</span><span class="rate">5.0</span></div><div class="rname">Sweet potato chips</div></div>
+      </div>
+      <nav class="navbar">
+        <span class="navbtn" onclick="go('s-home')"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn active"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn" onclick="go('s-notif')"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn" onclick="go('s-config')"><svg><use href="#i-user"/></svg></span>
+      </nav>
+      <div class="sheet" id="sh-rec">
+        <h4 id="recName">Recipe</h4>
+        <div style="font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:16px">Recipe based on the Food Guide, using whole ingredients (SDG 12).<br><br><b style="color:var(--ink)">Did you rate this recipe?</b></div>
+        <button class="btn" style="margin-bottom:10px" onclick="feedbackYes()">Yes — rate &amp; earn points</button>
+        <button class="btn ghost" onclick="closeSheets();go('s-home')">No — back to home</button>
+      </div>
+    </section>
+
+    <!-- INFORMATION -->
+    <section class="scr" id="s-info">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div style="text-align:center;font-weight:800;font-size:12.5px;margin-bottom:12px">Discover the power of foods through their colors</div>
+        <div class="colorrow" style="background:#F26D6D;color:#4A0E0E"><div class="bubbles"><span class="bb">🍓</span><span class="bb">🫑</span><span class="bb">🍅</span></div><div class="txt"><b>Reds — Strawberry, Bell pepper, Tomato</b><span>Fight fatigue, antioxidant effect and strengthen immunity.</span></div></div>
+        <div class="colorrow" style="background:#57B15C;color:#0E3A12"><div class="bubbles"><span class="bb">🥬</span><span class="bb">🥦</span><span class="bb">🥑</span></div><div class="txt"><b>Greens — Lettuce, Broccoli, Avocado</b><span>Rich in vitamins A, C and E; antibacterial and diuretic action.</span></div></div>
+        <div class="colorrow" style="background:#B08968;color:#3B2413"><div class="bubbles"><span class="bb">🥜</span><span class="bb">🌰</span><span class="bb">🫘</span></div><div class="txt"><b>Browns — Peanuts, Walnuts, Soy</b><span>Energy and immune support; rich in vitamin E.</span></div></div>
+        <div class="colorrow" style="background:#F5D06F;color:#4A3A08"><div class="bubbles"><span class="bb">🍌</span><span class="bb">🌽</span><span class="bb">🥔</span></div><div class="txt"><b>Yellows — Banana, Corn, Potato</b><span>Potassium and calcium; strengthen bones, muscles and the nervous system.</span></div></div>
+        <div class="colorrow" style="background:#F58A5E;color:#4A1E08"><div class="bubbles"><span class="bb">🥕</span><span class="bb">🍈</span><span class="bb">🍊</span></div><div class="txt"><b>Oranges — Carrot, Papaya, Orange</b><span>Vitamins A and C; support the nervous system and skin.</span></div></div>
+        <div class="colorrow" style="background:#B06AB3;color:#3A0E3C"><div class="bubbles"><span class="bb">🍇</span><span class="bb">🫐</span><span class="bb">🍠</span></div><div class="txt"><b>Purples — Grape, Plum, Beet</b><span>Antioxidants; help slow aging.</span></div></div>
+        <div style="text-align:center;font-size:12px;font-weight:700;margin:6px 0 10px">Stay on this page?</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn" onclick="toast('Staying in Information 📚')">Yes</button>
+          <button class="btn ghost" onclick="go('s-notif')">No</button>
+        </div>
+      </div>
+      <nav class="navbar">
+        <span class="navbtn" onclick="go('s-home')"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn active"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn" onclick="go('s-notif')"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn" onclick="go('s-config')"><svg><use href="#i-user"/></svg></span>
+      </nav>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="scr" id="s-notif">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div class="pagetitle">Notifications</div>
+        <div class="mealcard"><div style="font-size:12.5px;font-weight:700">🥕 Carrots are good for your eyes!</div><div style="font-size:11px;color:var(--ink-2);margin-top:4px">Tap to learn why · today 07:40</div></div>
+        <div class="mealcard"><div style="font-size:12.5px;font-weight:700">🎉 You earned 5 points</div><div style="font-size:11px;color:var(--ink-2);margin-top:4px">Use them in My Coupons · yesterday</div></div>
+        <div class="mealcard"><div style="font-size:12.5px;font-weight:700">🍠 Potato skins become chips!</div><div style="font-size:11px;color:var(--ink-2);margin-top:4px">Whole-ingredient use · 2 days ago</div></div>
+        <button class="btn" onclick="go('s-mcupons')">View My Coupons</button>
+      </div>
+      <nav class="navbar">
+        <span class="navbtn" onclick="go('s-home')"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn" onclick="go('s-receitas')"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn active"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn" onclick="go('s-config')"><svg><use href="#i-user"/></svg></span>
+      </nav>
+    </section>
+
+    <!-- COUPONS (store) -->
+    <section class="scr" id="s-cupons">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div style="text-align:center;font-weight:800;color:var(--green-strong);font-size:16px;margin-bottom:14px">Coupons</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-weight:800;margin-bottom:14px">
+          <span>°LEVEL 1°</span><span style="display:flex;align-items:center;gap:6px"><span id="coinsLbl">10</span> <span class="coin">$</span></span>
+        </div>
+        <div class="coupon" onclick="resgatar(30,'10% OFF Grocery')"><div class="ct">10% OFF&nbsp; Grocery</div><div class="img">🛒</div><div class="cost">30 <span class="coin">$</span></div></div>
+        <div class="coupon" onclick="resgatar(20,'5% OFF Gym')"><div class="ct">5% OFF Annual Gym Plan</div><div class="img">🏋️</div><div class="cost">20 <span class="coin">$</span></div></div>
+      </div>
+      <nav class="navbar">
+        <span class="navbtn" onclick="go('s-home')"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn" onclick="go('s-receitas')"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn" onclick="go('s-notif')"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn active" onclick="go('s-config')"><svg><use href="#i-user"/></svg></span>
+      </nav>
+    </section>
+
+    <!-- MY COUPONS -->
+    <section class="scr" id="s-mcupons">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div class="pagetitle">My Coupons</div>
+        <div class="codecard"><div class="t">10% OFF — GROCERY</div><div class="s">On purchases over 99.99</div><div class="s">Code: NUTRIEAT10</div></div>
+        <div class="codecard"><div class="t">5% OFF — GYM</div><div class="s">Annual Plan</div><div class="s">Code: NUTRIACAD5</div></div>
+        <div style="text-align:center;font-size:12px;font-weight:700;margin:10px 0">Exit the app?</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn" onclick="go('s-splash')">Yes</button>
+          <button class="btn ghost" onclick="go('s-home')">No</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="scr" id="s-config">
+      <div class="statusbar"><svg class="slogo"><use href="#mark"/></svg>08:20</div>
+      <div class="content">
+        <div class="pagetitle">Settings</div>
+        <button class="listrow" onclick="toast('Account: nutrieat@demo.com')">Account</button>
+        <button class="listrow" onclick="go('s-excl')">Food filtering</button>
+        <button class="listrow" onclick="go('s-info')">Information</button>
+        <button class="listrow" onclick="toast('Food Guide — Ministry of Health 📘')">Food guide</button>
+        <button class="listrow" style="border-bottom:none" onclick="go('s-mcupons')">My coupons</button>
+        <button class="listrow" style="border-bottom:none" onclick="go('s-cupons')">Coupon store</button>
+      </div>
+      <nav class="navbar">
+        <span class="navbtn" onclick="go('s-home')"><svg><use href="#i-home"/></svg></span>
+        <span class="navbtn" onclick="go('s-receitas')"><svg><use href="#i-menu"/></svg></span>
+        <span class="navbtn" onclick="go('s-notif')"><svg><use href="#i-bell"/></svg></span>
+        <span class="navbtn active"><svg><use href="#i-user"/></svg></span>
+      </nav>
+    </section>
+
+  </div></div>
+</div>
+
+<script>
+  var coins = 10;
+  var MEALS = [
+    {t:'Breakfast', groups:[
+      [['🍳','egg'],['🍞','Whole-grain bread'],['🥛','Yogurt']],
+      [['🍞','Sliced bread'],['🍖','Cold cuts'],['🍓','Fruits']],
+      [['🥖','Grilled bread'],['🍈','papaya'],['🥑','avocado smoothie']]]},
+    {t:'Lunch', groups:[
+      [['🍛','Rice & beans'],['🥗','Salad'],['🐟','Tilapia fillet']],
+      [['🍚','Rice'],['🥗','Salad'],['🍳','Omelette']],
+      [['🍝','Pasta with ground beef'],['',''],['','']]]},
+    {t:'Dinner', groups:[
+      [['🍗','Grilled chicken fillet'],['🥬','Arugula salad'],['🥖','White bread']],
+      [['🍚','Rice'],['🥔','Roast chicken with potatoes'],['','']],
+      [['🥘','Beef lasagna'],['',''],['','']]]}
+  ];
+  var mealIdx = 0, groupIdx = [0,0,0];
+
+  function go(id){
+    closeSheets();
+    document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on')});
+    document.getElementById(id).classList.add('on');
+    if(id==='s-home') renderMeals();
+    if(id==='s-cupons') document.getElementById('coinsLbl').textContent = coins;
+  }
+  function toast(msg){
+    var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on');
+    clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('on')},1800);
+  }
+  function openSheet(id){ closeSheets(); document.getElementById(id).classList.add('on'); }
+  function closeSheets(){ document.querySelectorAll('.sheet').forEach(function(s){s.classList.remove('on')}); }
+  function setMeal(i,el){ mealIdx=i; document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on')}); el.classList.add('on'); renderMeals(); }
+  function renderMeals(){
+    var m = MEALS[mealIdx];
+    document.getElementById('mealTitle').textContent = m.t;
+    var g = m.groups[groupIdx[mealIdx]];
+    var html = '<div class="mealcard"><div class="cardtop">'+
+      '<button class="ok" onclick="aceitar()"><svg><use href="#i-check"/></svg></button>'+
+      '<button class="no" onclick="recusar()"><svg><use href="#i-x"/></svg></button></div>'+
+      '<div class="foods">'+ g.filter(function(f){return f[0]}).map(function(f){
+        return '<div class="food"><div class="tile">'+f[0]+'</div><div class="fl">'+f[1]+'</div></div>';
+      }).join('') + '</div><div class="inforow"><button class="infoic" onclick="go(\'s-info\')">i</button></div></div>';
+    document.getElementById('meals').innerHTML = html;
+  }
+  function aceitar(){ toast('Meal chosen ✅ heading to recipes…'); setTimeout(function(){go('s-receitas')},700); }
+  function recusar(){
+    groupIdx[mealIdx] = (groupIdx[mealIdx]+1) % MEALS[mealIdx].groups.length;
+    toast('No problem — another '+MEALS[mealIdx].t.toLowerCase()+' option');
+    renderMeals();
+  }
+  function setRegion(r){ document.getElementById('regionLbl').textContent = r+' · chosen region'; closeSheets(); toast('Region: '+r); }
+  function openRecipe(n){ document.getElementById('recName').textContent=n; openSheet('sh-rec'); }
+  function feedbackYes(){ coins += 5; closeSheets(); toast('Feedback sent! +5 points 🪙'); setTimeout(function(){go('s-mcupons')},800); }
+  function resgatar(custo,nome){
+    if(coins>=custo){ coins-=custo; document.getElementById('coinsLbl').textContent=coins; toast(nome+' redeemed → My Coupons'); setTimeout(function(){go('s-mcupons')},800); }
+    else toast('Not enough points ('+coins+'/'+custo+')');
+  }
+  renderMeals();
+</script>
+</body>
+</html>

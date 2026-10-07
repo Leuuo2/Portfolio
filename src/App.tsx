@@ -47,6 +47,7 @@ const projects: Project[] = [
     role: "Product designer — research, wireframes, prototype, final screens",
     tech: ["Figma", "Design System", "Prototyping", "User Research"],
     links: [
+      { label: "Live Demo", url: "nutrieat/" },
       { label: "View Figma", url: "https://www.figma.com/proto/2EeHaUnIb6XxF3dvjsjD8F/NutriEat-Prototype?node-id=0-1&t=5Q4Jr2fC64YOJ64O-1" },
     ],
     learned: "How to translate a real problem into simple flows, when to add friction and when to remove, designing for non-technical users.",
@@ -143,6 +144,24 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                    {p.id === "nutrieat" && (
+                      <div className="rounded-xl bg-muted p-4">
+                        <p className="text-xs font-medium">Interactive demo — simulates the app end to end (signup → meals → recipes → feedback → coupons)</p>
+                        <iframe
+                          src="nutrieat/"
+                          title="NutriEat interactive prototype"
+                          className="mt-2 h-[760px] w-full rounded-xl border bg-background"
+                          loading="lazy"
+                        />
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Embed not loading?{" "}
+                          <a className="underline" href="nutrieat/" target="_blank" rel="noreferrer">
+                            Open the demo in a new tab
+                          </a>
+                          .
+                        </p>
+                      </div>
+                    )}
                     {p.id === "vesttrack" && (
                       <div className="rounded-xl bg-muted p-4">
                         <p className="text-xs font-medium">Demo GIFs</p>
