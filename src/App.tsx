@@ -47,7 +47,7 @@ const projects: Project[] = [
     role: "Product designer — research, wireframes, prototype, final screens",
     tech: ["Figma", "Design System", "Prototyping", "User Research"],
     links: [
-      { label: "View Figma", url: "https://www.figma.com/design/2EeHaUnIb6XxF3dvjsjD8F/NutriEat-Prototype?node-id=0-1&t=5Q4Jr2fC64YOJ64O-1" },
+      { label: "View Figma", url: "https://www.figma.com/proto/2EeHaUnIb6XxF3dvjsjD8F/NutriEat-Prototype?node-id=0-1&t=5Q4Jr2fC64YOJ64O-1" },
     ],
     learned: "How to translate a real problem into simple flows, when to add friction and when to remove, designing for non-technical users.",
     improvements: [
